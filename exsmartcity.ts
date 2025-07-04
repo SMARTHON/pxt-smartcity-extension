@@ -16,6 +16,7 @@ namespace SmartCityExtension {
     //---motor fan--------------------------------
 
     //---flame sensor--------------------------------
+    let flame_variable = 0;
     /** 
      * Read the detection result of flame sensor, return true when detect flame, otherwise return false
      */
@@ -33,6 +34,23 @@ namespace SmartCityExtension {
     //---flame sensor--------------------------------
 
     //---button--------------------------------
+
+    export enum PressButtonList {
+        //% block="P0"
+        b0 = 0,
+        //% block="P1"
+        b1 = 1,
+        //% block="P2"
+        b2 = 2,
+        //% block="P12"
+        //b12 = 12,
+        //% block="P13"
+        //b13 = 13,
+        //% block="P14"
+        //b14 = 14,
+        //% block="P15"
+        //b15 = 15
+    }
     /**
      * When the Pin is pressed, it will trigger the function inside the block
      */
@@ -76,6 +94,12 @@ namespace SmartCityExtension {
     //---button--------------------------------
 
     //---servo360--------------------------------
+    export enum ServoDirection {
+        //% block="clockwise"
+        clockwise,
+        //% block="anti-clockwise"
+        anticlockwise
+    }
     export enum ServoSpeed {
         //% blockId=servo360_level_0
         //% block="Stop"
@@ -170,6 +194,7 @@ namespace SmartCityExtension {
     }
     //---PM2.5 sensor--------------------------------
     //---CO2 sensor--------------------------------
+    let TVOC_OK = true;
     function indenvGasReady(): boolean {
         if (TVOC_OK != true) {
             return false
@@ -184,11 +209,11 @@ namespace SmartCityExtension {
         }
         return true
     }
-	/**
+    /**
     * CO2 and TVOC Sensor (CCS811) Start
     */
     //% blockId="indenvStart" block="CCS811 Start"
-	//% group="CO2 and TVOC Sensor (CCS811)"
+    //% group="CO2 and TVOC Sensor (CCS811)"
     //% subcategory="Green Engineering"
     //% weight=40
     export function indenvStart(): void {
@@ -224,15 +249,15 @@ namespace SmartCityExtension {
         }
         basic.pause(200)
     }
-	/**
+    /**
      * Set TVOC and CO2 baseline (Baseline should be a decimal value)
      * @param value  , eg: 33915
      */
-	//% group="CO2 and TVOC Sensor (CCS811)"
+    //% group="CO2 and TVOC Sensor (CCS811)"
     //% subcategory="Green Engineering"
     //% blockId=CCS811_setBaseline block="set CO2 and TVOC baseline|%value value"
-	//% weight=39
-	export function setBaseline(value: number): void {
+    //% weight=39
+    export function setBaseline(value: number): void {
         let buffer: Buffer = pins.createBuffer(3);
         buffer[0] = 0x20;
         buffer[1] = value >> 8 & 0xff;
@@ -240,13 +265,13 @@ namespace SmartCityExtension {
         pins.i2cWriteBuffer(90, buffer);
 
     }
-	/**
+    /**
     * Read estimated CO2
     */
-	//% group="CO2 and TVOC Sensor (CCS811)"
+    //% group="CO2 and TVOC Sensor (CCS811)"
     //% subcategory="Green Engineering"
     //% blockId="indenvgeteCO2" block="Value of CO2"
-	//% weight=38
+    //% weight=38
     export function indenvgeteCO2(): number {
 
         let i
@@ -266,12 +291,12 @@ namespace SmartCityExtension {
         //basic.pause(200)
         return pins.i2cReadNumber(90, NumberFormat.UInt16BE, false)
     }
-	/**
+    /**
     * Read Total VOC
     */
-	//% group="CO2 and TVOC Sensor (CCS811)"
+    //% group="CO2 and TVOC Sensor (CCS811)"
     //% blockId="indenvgetTVOC" block="Value of TVOC"
-	//% weight=37
+    //% weight=37
     export function indenvgetTVOC(): number {
 
         let i = 0;
@@ -366,8 +391,8 @@ namespace SmartCityExtension {
     //% weight=29
     //% group="Laser"
     //% subcategory="Transportation"
-   
-    export function turn_laser(state: boolean, pin: DigitalPin): void{
+
+    export function turn_laser(state: boolean, pin: DigitalPin): void {
         let on_off = state ? 1 : 0;
         pins.digitalWritePin(pin, on_off)
     }
@@ -380,8 +405,8 @@ namespace SmartCityExtension {
     //% blockId="smarthon_Laser"
     //% block="Get receiver (laser received or not) at %receiver"
     //% weight=30
-	//% group="Laser"
-	//% subcategory="Transportation"
+    //% group="Laser"
+    //% subcategory="Transportation"
 
     export function Laser(receiver: DigitalPin): boolean {
         if (pins.digitalReadPin(receiver))
@@ -404,27 +429,24 @@ namespace SmartCityExtension {
     }
     //---IR sensor--------------------------------
     //---4-digital screen--------------------------------
-    let TubeTab: number [] = [
-    0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07,
-    0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71
+    let TubeTab: number[] = [
+        0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07,
+        0x7f, 0x6f, 0x77, 0x7c, 0x39, 0x5e, 0x79, 0x71
     ];
     /**
      *
      */
-    export class TM1637
-    {
+    export class TM1637 {
         clkPin: DigitalPin;
         dataPin: DigitalPin;
         brightnessLevel: number;
         pointFlag: boolean;
         buf: Buffer;
 
-        private writeByte(wrData: number)
-        {
-            for(let i = 0; i < 8; i ++)
-            {
+        private writeByte(wrData: number) {
+            for (let i = 0; i < 8; i++) {
                 pins.digitalWritePin(this.clkPin, 0);
-                if(wrData & 0x01)pins.digitalWritePin(this.dataPin, 1);
+                if (wrData & 0x01) pins.digitalWritePin(this.dataPin, 1);
                 else pins.digitalWritePin(this.dataPin, 0);
                 wrData >>= 1;
                 pins.digitalWritePin(this.clkPin, 1);
@@ -435,30 +457,27 @@ namespace SmartCityExtension {
             pins.digitalWritePin(this.clkPin, 1);
         }
 
-        private start()
-        {
+        private start() {
             pins.digitalWritePin(this.clkPin, 1);
             pins.digitalWritePin(this.dataPin, 1);
             pins.digitalWritePin(this.dataPin, 0);
             pins.digitalWritePin(this.clkPin, 0);
         }
 
-        private stop()
-        {
+        private stop() {
             pins.digitalWritePin(this.clkPin, 0);
             pins.digitalWritePin(this.dataPin, 0);
             pins.digitalWritePin(this.clkPin, 1);
             pins.digitalWritePin(this.dataPin, 1);
         }
 
-        private coding(dispData: number): number
-        {
+        private coding(dispData: number): number {
             let pointData = 0;
 
-            if(this.pointFlag == true)pointData = 0x80;
-            else if(this.pointFlag == false)pointData = 0;
+            if (this.pointFlag == true) pointData = 0x80;
+            else if (this.pointFlag == false) pointData = 0;
 
-            if(dispData == 0x7f)dispData = 0x00 + pointData;
+            if (dispData == 0x7f) dispData = 0x00 + pointData;
             else dispData = TubeTab[dispData] + pointData;
 
             return dispData;
@@ -472,66 +491,60 @@ namespace SmartCityExtension {
         //% blockId=tm1637_display_number block="%TM1637 |show number|%dispData"
         //% group="TM1637 4-Digit Display"
         //% subcategory=Display
-        show(dispData: number)
-        {
-            let compare_01:number = dispData % 100;
-            let compare_001:number = dispData % 1000;
+        show(dispData: number) {
+            let compare_01: number = dispData % 100;
+            let compare_001: number = dispData % 1000;
 
-            if(dispData < 10)
-            {
+            if (dispData < 10) {
                 this.bit(dispData, 3);
                 this.bit(0x7f, 2);
                 this.bit(0x7f, 1);
                 this.bit(0x7f, 0);
             }
-            else if(dispData < 100)
-            {
+            else if (dispData < 100) {
                 this.bit(dispData % 10, 3);
-                if(dispData > 90){
+                if (dispData > 90) {
                     this.bit(9, 2);
-                } else{
+                } else {
                     this.bit(Math.floor(dispData / 10) % 10, 2);
                 }
 
                 this.bit(0x7f, 1);
                 this.bit(0x7f, 0);
             }
-            else if(dispData < 1000)
-            {
+            else if (dispData < 1000) {
                 this.bit(dispData % 10, 3);
-                if(compare_01 > 90){
+                if (compare_01 > 90) {
                     this.bit(9, 2);
-                } else{
+                } else {
                     this.bit(Math.floor(dispData / 10) % 10, 2);
                 }
-                if(compare_001 > 900){
+                if (compare_001 > 900) {
                     this.bit(9, 1);
-                } else{
+                } else {
                     this.bit(Math.floor(dispData / 100) % 10, 1);
                 }
                 this.bit(0x7f, 0);
             }
-            else if(dispData < 10000)
-            {
+            else if (dispData < 10000) {
                 this.bit(dispData % 10, 3);
-                if(compare_01 > 90){
+                if (compare_01 > 90) {
                     this.bit(9, 2);
-                } else{
+                } else {
                     this.bit(Math.floor(dispData / 10) % 10, 2);
                 }
-                if(compare_001 > 900){
+                if (compare_001 > 900) {
                     this.bit(9, 1);
-                } else{
+                } else {
                     this.bit(Math.floor(dispData / 100) % 10, 1);
                 }
-                if(dispData > 9000){
+                if (dispData > 9000) {
                     this.bit(9, 0);
-                } else{
+                } else {
                     this.bit(Math.floor(dispData / 1000) % 10, 0);
                 }
             }
-            else
-            {
+            else {
                 this.bit(9, 3);
                 this.bit(9, 2);
                 this.bit(9, 1);
@@ -547,8 +560,7 @@ namespace SmartCityExtension {
         //% level.min=0 level.max=7
         //% group="TM1637 4-Digit Display"
         //% subcategory=Display
-        set(level: number)
-        {
+        set(level: number) {
             this.brightnessLevel = level;
 
             this.bit(this.buf[0], 0x00);
@@ -567,10 +579,8 @@ namespace SmartCityExtension {
         //% bitAddr.min=0 bitAddr.max=3
         //% group="TM1637 4-Digit Display"
         //% subcategory=Display
-        bit(dispData: number, bitAddr: number)
-        {
-            if((dispData == 0x7f) || ((dispData <= 9) && (bitAddr <= 3)))
-            {
+        bit(dispData: number, bitAddr: number) {
+            if ((dispData == 0x7f) || ((dispData <= 9) && (bitAddr <= 3))) {
                 let segData = 0;
 
                 segData = this.coding(dispData);
@@ -596,8 +606,7 @@ namespace SmartCityExtension {
         //% blockId=tm1637_display_point block="%TM1637 |turn|%point|colon point"
         //% group="TM1637 4-Digit Display"
         //% subcategory=Display
-        point(point: boolean)
-        {
+        point(point: boolean) {
             this.pointFlag = point;
 
             this.bit(this.buf[0], 0x00);
@@ -612,8 +621,7 @@ namespace SmartCityExtension {
         //% blockId=tm1637_display_clear block="%TM1637|clear"
         //% group="TM1637 4-Digit Display"
         //% subcategory=Display
-        clear()
-        {
+        clear() {
             this.bit(0x7f, 0x00);
             this.bit(0x7f, 0x01);
             this.bit(0x7f, 0x02);
@@ -630,8 +638,7 @@ namespace SmartCityExtension {
     //% group="TM1637 4-Digit Display"
     //% blockSetVariable=TM1637
     //% subcategory=Display
-    export function createDisplay(clkPin: DigitalPin, dataPin: DigitalPin): TM1637
-    {
+    export function createDisplay(clkPin: DigitalPin, dataPin: DigitalPin): TM1637 {
         let display = new TM1637();
 
         display.buf = pins.createBuffer(4);
