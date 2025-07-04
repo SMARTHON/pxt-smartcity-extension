@@ -296,6 +296,7 @@ namespace SmartCityExtension {
     */
     //% group="CO2 and TVOC Sensor (CCS811)"
     //% blockId="indenvgetTVOC" block="Value of TVOC"
+    //% subcategory="Green Engineering"
     //% weight=37
     export function indenvgetTVOC(): number {
 
