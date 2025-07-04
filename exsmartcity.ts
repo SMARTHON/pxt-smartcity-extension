@@ -1,6 +1,6 @@
 
 
-//% weight=20 color=#FFFFFF block="SmartCity Extension"
+//% weight=20 color=#000000 block="SmartCity Extension"
 namespace SmartCityExtension {
     //---Smart living-----------------------------------------------
     //---motor fan--------------------------------
