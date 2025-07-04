@@ -1,0 +1,17 @@
+{
+    "name": "Smartcity-extension",
+    "version": "0.1",
+    "description": "This is the extension for SMARTHON Smartcity in PXT",
+    "license": "MIT",
+    "dependencies": {
+        "core": "*"
+    },
+    "files": [
+        "README.md",
+        "exsmartcity.ts"
+    ],
+    "testFiles": [
+        "tests.ts"
+    ],
+    "public": true
+}
