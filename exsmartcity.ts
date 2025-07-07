@@ -1,6 +1,6 @@
 
 
-//% weight=20 color=#000000 block="SmartCity Extension"
+//% weight=98 color=#000000 block="SmartCity Extension"
 namespace SmartCityExtension {
     //---Smart living-----------------------------------------------
     //---motor fan--------------------------------
@@ -490,8 +490,8 @@ namespace SmartCityExtension {
          */
 
         //% blockId=tm1637_display_number block="%TM1637 |show number|%dispData"
-        //% group="TM1637 4-Digit Display"
-        //% subcategory=Display
+        //% group="4-Digit Display"
+        //% subcategory="Transportation"
         show(dispData: number) {
             let compare_01: number = dispData % 100;
             let compare_001: number = dispData % 1000;
@@ -559,8 +559,8 @@ namespace SmartCityExtension {
          */
         //% blockId=tm1637_set_display_level block="%TM1637 |brightness level to|%level"
         //% level.min=0 level.max=7
-        //% group="TM1637 4-Digit Display"
-        //% subcategory=Display
+        //% group="4-Digit Display"
+        //% subcategory="Transportation"
         set(level: number) {
             this.brightnessLevel = level;
 
@@ -578,8 +578,8 @@ namespace SmartCityExtension {
         //% blockId=tm1637_display_bit block="%TM1637 |show single number|%dispData|at digit|%bitAddr"
         //% dispData.min=0 dispData.max=9
         //% bitAddr.min=0 bitAddr.max=3
-        //% group="TM1637 4-Digit Display"
-        //% subcategory=Display
+        //% group="4-Digit Display"
+        //% subcategory="Transportation"
         bit(dispData: number, bitAddr: number) {
             if ((dispData == 0x7f) || ((dispData <= 9) && (bitAddr <= 3))) {
                 let segData = 0;
@@ -605,8 +605,8 @@ namespace SmartCityExtension {
          * @param pointEn value of point switch
          */
         //% blockId=tm1637_display_point block="%TM1637 |turn|%point|colon point"
-        //% group="TM1637 4-Digit Display"
-        //% subcategory=Display
+        //% group="4-Digit Display"
+        //% subcategory="Transportation"
         point(point: boolean) {
             this.pointFlag = point;
 
@@ -620,8 +620,8 @@ namespace SmartCityExtension {
          * Clear the display
          */
         //% blockId=tm1637_display_clear block="%TM1637|clear"
-        //% group="TM1637 4-Digit Display"
-        //% subcategory=Display
+        //% group="4-Digit Display"
+        //% subcategory="Transportation"
         clear() {
             this.bit(0x7f, 0x00);
             this.bit(0x7f, 0x01);
@@ -636,9 +636,9 @@ namespace SmartCityExtension {
      * @param dataPin is data pin,eg: DigitalPin.P15
      */
     //% blockId=tm1637_var_create block="TM1637 Display at|%clkPin|and|%dataPin"
-    //% group="TM1637 4-Digit Display"
+    //% group="4-Digit Display"
     //% blockSetVariable=TM1637
-    //% subcategory=Display
+    //% subcategory="Transportation"
     export function createDisplay(clkPin: DigitalPin, dataPin: DigitalPin): TM1637 {
         let display = new TM1637();
 
