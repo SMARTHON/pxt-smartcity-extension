@@ -358,7 +358,7 @@ namespace SmartCityExtension {
     //% subcategory="Green Engineering"
     //% weight=70
     //% group="Sunlight Charging"
-    //% blockId="smarthon_get_energy_transferred"
+    //% blockId="smarthon_get_battery_level"
     //% block="Get battery level(percentage)"
     export function getBattery(): number {
         return battery_level;
