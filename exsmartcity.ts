@@ -645,8 +645,8 @@ namespace SmartCityExtension {
 
     /**
      * Create a new TM1637 object
-     * @param clkPin is clk pin, eg: DigitalPin.P14
-     * @param dataPin is data pin,eg: DigitalPin.P15
+     * @param clkPin is clk pin, eg: DigitalPin.P15
+     * @param dataPin is data pin,eg: DigitalPin.P14
      */
     //% blockId=tm1637_var_create block="TM1637 Display at|%clkPin|and|%dataPin"
     //% group="4-Digit Display"
