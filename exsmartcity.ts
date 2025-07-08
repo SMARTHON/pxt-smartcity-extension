@@ -337,7 +337,7 @@ namespace SmartCityExtension {
             basic.pause(10);
         }
         let ava = sum/30;
-        return ava;
+        return Math.round(ava*100)/100; // round to 2 decimal places
     }
 
     //% subcategory="Green Engineering"
