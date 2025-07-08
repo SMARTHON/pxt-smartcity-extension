@@ -329,9 +329,25 @@ namespace SmartCityExtension {
     }
     //---CO2 sensor--------------------------------
     //---water quality sensor--------------------------------
+    function readTDSValue(pin:AnalogPin):number{
+        let sum = 0;
+        //  read 30 times to get the average
+        for (let n = 0; n < 30; n++) {
+            sum += pins.analogReadPin(pin);
+            basic.pause(10);
+        }
+        let ava = sum/30;
+        return ava;
+    }
 
-
-
+    //% subcategory="Green Engineering"
+    //% weight=80
+    //% group="TDS Value"
+    //% blockId="smarthon_read_TDC_value"
+    //% block="Read battery level (percentage) at Pin %pin"
+    export function getTDSValue(pin: AnalogPin): number {
+        return readTDSValue(pin);
+    }
     //---water quality sensor--------------------------------
     //---sunlight board--------------------------------
     let battery_level = 0
