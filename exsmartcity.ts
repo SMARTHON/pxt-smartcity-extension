@@ -164,6 +164,131 @@ namespace SmartCityExtension {
         }
     }
     //---servo360--------------------------------
+    //---HX711----------------------------------------------
+    let PD_SCK = DigitalPin.P2; // 時鐘引腳
+    let DOUT = DigitalPin.P1;   // 數據引腳
+    let GAIN: number = 0;       // 增益設置
+    let OFFSET: number = 0;
+    let CALIBRATION_FACTOR = 476.592
+    /**
+     * 設置數據引腳 (DOUT)
+     * 設置時鐘引腳 (SCK)
+     * @param pinDOUT DOUT 引腳
+     * @param pinPD_SCK SCK 引腳
+     */
+    //% blockId="set_pin" block="HX711 set DataPin %pinDOUT and ClockPin %pinPD_SCK"
+    //% weight=100 blockGap=8
+    //% group="HX711"
+    //% subcategory="Smart living"
+    export function SetPIN_DOUT(pinDOUT: DigitalPin, pinPD_SCK: DigitalPin): void {
+        DOUT = pinDOUT;
+        PD_SCK = pinPD_SCK;
+        set_gain(128); // 初始化 HX711，設置預設增益為 128
+        OFFSET = read();
+    }
+
+    /**
+     * 檢查 HX711 是否準備好
+     */
+    export function is_ready(): boolean {
+        return pins.digitalReadPin(DOUT) == 0;
+    }
+
+    /**
+     * 設置增益 (128, 64 或 32)
+     * @param gain 增益值
+     */
+    export function set_gain(gain: number): void {
+        switch (gain) {
+            case 128: // 通道 A，增益 128
+                GAIN = 1;
+                break;
+            case 64:  // 通道 A，增益 64
+                GAIN = 3;
+                break;
+            case 32:  // 通道 B，增益 32
+                GAIN = 2;
+                break;
+        }
+        pins.digitalWritePin(PD_SCK, 0);
+        read();
+    }
+
+    /**
+     * 模擬 shiftIn 讀取 8 位數據
+     * @param bitOrder 位元順序 (0: LSBFIRST, 1: MSBFIRST)
+     */
+    export function shiftInSlow(bitOrder: number): number {
+        let value: number = 0;
+        for (let i = 0; i < 8; ++i) {
+            pins.digitalWritePin(PD_SCK, 1);
+            control.waitMicros(1);
+            if (bitOrder == 0) {
+                value |= pins.digitalReadPin(DOUT) << i;
+            } else {
+                value |= pins.digitalReadPin(DOUT) << (7 - i);
+            }
+            pins.digitalWritePin(PD_SCK, 0);
+            control.waitMicros(1);
+        }
+        return value;
+    }
+
+    /**
+     * 從 HX711 讀取 24 位原始數據
+     */
+    //% blockId="HX711_READ" block="read HX711 data"
+    //% group="HX711"
+    //% subcategory="Smart living"
+    //% weight=80 blockGap=8
+    export function read(): number {
+        // 等待 HX711 準備好
+        while (!is_ready()) {
+            basic.pause(0);
+        }
+
+        // 讀取 24 位數據
+        let data: number[] = [0, 0, 0];
+        let filler: number = 0x00;
+        data[2] = shiftInSlow(1); // MSBFIRST
+        data[1] = shiftInSlow(1);
+        data[0] = shiftInSlow(1);
+
+        // 設置下一次讀取的通道和增益
+        for (let i = 0; i < GAIN; i++) {
+            pins.digitalWritePin(PD_SCK, 1);
+            control.waitMicros(1);
+            pins.digitalWritePin(PD_SCK, 0);
+            control.waitMicros(1);
+        }
+
+        // 處理 MSB 並構建 32 位簽名整數
+        if (data[2] & 0x80) {
+            filler = 0xFF;
+        }
+        data[2] = data[2] ^ 0x80; // 移除簽名位
+        return (filler << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+    }
+
+    //% blockId="HX711_GET_UNITS" block="get N averaged final scaled value
+    //% weight=80 blockGap=8
+    export function get_units(): number {
+        let valor: number = 0
+        //let valor_string: string = ""
+        //let ceros: string = ""
+
+        valor = (read() - OFFSET) / CALIBRATION_FACTOR
+        /* if (Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString().length == 0) {
+            ceros = "00"
+         } else if (Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString().length == 1) {
+            ceros = "0"
+         }
+    valor_string = "" + Math.trunc(valor).toString() + "." + ceros + Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString()
+     */
+        return valor
+    }
+
+    //---HX711----------------------------------------------
     //---Smart living-----------------------------------------------
 
 
@@ -329,15 +454,15 @@ namespace SmartCityExtension {
     }
     //---CO2 sensor--------------------------------
     //---water quality sensor--------------------------------
-    function readTDSValue(pin:AnalogPin):number{
+    function readTDSValue(pin: AnalogPin): number {
         let sum = 0;
         //  read 30 times to get the average
         for (let n = 0; n < 30; n++) {
             sum += pins.analogReadPin(pin);
             basic.pause(10);
         }
-        let ava = sum/30;
-        return Math.round(ava*100)/100; // round to 2 decimal places
+        let ava = sum / 30;
+        return Math.round(ava * 100) / 100; // round to 2 decimal places
     }
 
     //% subcategory="Green Engineering"
