@@ -169,7 +169,7 @@ namespace SmartCityExtension {
     let DOUT = DigitalPin.P1;   // 數據引腳
     let GAIN: number = 0;       // 增益設置
     let OFFSET: number = 0;
-    let CALIBRATION_FACTOR = 476.592
+    let CALIBRATION_FACTOR = 125
     /**
      * 設置數據引腳 (DOUT)
      * 設置時鐘引腳 (SCK)
@@ -184,7 +184,11 @@ namespace SmartCityExtension {
         DOUT = pinDOUT;
         PD_SCK = pinPD_SCK;
         set_gain(128); // 初始化 HX711，設置預設增益為 128
-        OFFSET = read();
+        let sum = 0;
+        for(let i = 0; i<5; i++){
+            sum += read();
+        }
+        OFFSET = sum/5;
     }
 
     /**
@@ -270,7 +274,7 @@ namespace SmartCityExtension {
         return (filler << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
     }
 
-    //% blockId="HX711_GET_UNITS" block="get N averaged final scaled value
+    //% blockId="HX711_GET_UNITS" block="get scaled value"
     //% weight=80 blockGap=8
     export function get_units(): number {
         let valor: number = 0
@@ -285,7 +289,7 @@ namespace SmartCityExtension {
          }
     valor_string = "" + Math.trunc(valor).toString() + "." + ceros + Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString()
      */
-        return valor
+        return Math.round(valor *100)/100
     }
 
     //---HX711----------------------------------------------
