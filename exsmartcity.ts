@@ -170,6 +170,8 @@ namespace SmartCityExtension {
     let GAIN: number = 0;       // 增益設置
     let OFFSET: number = 0;
     let CALIBRATION_FACTOR = 125
+    let zeroOffset = 8429250; // 無負載時的數據
+    let scaleFactor = -426.96; // 根據 135g 計算的比例因子
     /**
      * 設置數據引腳 (DOUT)
      * 設置時鐘引腳 (SCK)
@@ -247,6 +249,7 @@ namespace SmartCityExtension {
     //% weight=80 blockGap=8
     export function read(): number {
         // 等待 HX711 準備好
+        let value:number = 0;
         while (!is_ready()) {
             basic.pause(0);
         }
@@ -271,17 +274,43 @@ namespace SmartCityExtension {
             filler = 0xFF;
         }
         data[2] = data[2] ^ 0x80; // 移除簽名位
-        return (filler << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+        value = (filler << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+        if (value < -8388608) {
+            value += 16777216; // 校正負數溢出
+        }
+        return value
     }
 
-    //% blockId="HX711_GET_UNITS" block="get scaled value"
+    export enum weight_kg {
+        //% blockId=HX711_5kg
+        //% block="5kg"
+        kg_5 = 0,
+        //% blockId=HX711_10kg
+        //% block="10kg"
+        kg_10 = 1,
+        //% blockId=HX711_20kg
+        //% block="20kg"
+        kg_15 = 2,
+    }
+
+    //% blockId="HX711_GET_UNITS" block="get scaled value %uni"
     //% weight=80 blockGap=8
-    export function get_units(): number {
+    export function get_units(uni:weight_kg): number {
         let valor: number = 0
         //let valor_string: string = ""
         //let ceros: string = ""
-
-        valor = (read() - OFFSET) / CALIBRATION_FACTOR
+        switch(uni){
+            case 0:
+                valor = (read() - OFFSET) / scaleFactor;
+                break;
+            case 1:
+                valor = (read() - OFFSET) / CALIBRATION_FACTOR;
+                break;
+            case 2:
+                valor = (read() - OFFSET) / CALIBRATION_FACTOR;
+                break;
+        }
+        
         /* if (Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString().length == 0) {
             ceros = "00"
          } else if (Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString().length == 1) {
