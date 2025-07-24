@@ -342,7 +342,7 @@ namespace SmartCityExtension {
     //% weight=80
     //% group="TDS Value"
     //% blockId="smarthon_read_TDC_value"
-    //% block="Read battery level (percentage) at Pin %pin"
+    //% block="Read water quality at Pin %pin"
     export function getTDSValue(pin: AnalogPin): number {
         return readTDSValue(pin);
     }
